@@ -12,19 +12,24 @@ export const App = () => {
   const [inputTitle, setTitle] = useState("");
   const [inputTime, setTime] = useState("");
   const [error, setError] = useState("");
-
-
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
-      const { data, error } = await supabase
-        .from('study-record') 
-        .select('title, time');
+      try {
+        const { data, error } = await supabase
+          .from('study-record') 
+          .select('title, time');
 
-      if (error) {
+        if (error) {
+          console.error("Error fetching data:", error);
+        } else {
+          setRecords(data);
+        }
+      } catch (error) {
         console.error("Error fetching data:", error);
-      } else {
-        setRecords(data);
+      } finally {
+        setIsLoading(false); 
       }
     };
 
@@ -68,6 +73,10 @@ export const App = () => {
   };
 
   const sumTime = records.reduce((sum, record) => sum + parseInt(record.time, 10), 0);
+
+  if (isLoading) {
+    return <div className="App">Loading...</div>;
+  }
 
   return (
     <div className="App">
